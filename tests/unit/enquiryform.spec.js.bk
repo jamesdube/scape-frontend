@@ -1,0 +1,79 @@
+import { mount } from "@vue/test-utils";
+import enquiryform from "@/components/EnquiryForm2.vue";
+import moxios from 'moxios';
+import faker from 'faker';
+require('dotenv')
+
+describe("EnquiryForm", () => {
+
+	beforeEach(() => {
+		moxios.install();
+	});
+
+	afterEach(() => {
+		moxios.uninstall();
+	});
+
+	let wrapper = mount(enquiryform)
+
+	let see = (text,selector) => {
+		let wrap = selector ? wrapper.find(selector) : wrapper
+		expect(wrap.html()).toContain(text)
+	}
+
+	let type = (text,selector) => {
+		let node = wrapper.find(selector);
+		node.element.value = text
+		node.trigger('input')
+	}
+
+	let click = (selector) => {
+		wrapper.find(selector).trigger('click')
+	}
+
+  	it("it fetches subjects data on load", () => {
+
+      let wrapper = mount(enquiryform)
+
+    	let mathsCode = faker.helpers.replaceSymbols("###");
+
+    	// console.log(mathsCode)
+    	//console.log(process.env.VUE_APP_SCAPE_SUBJECTS_SERVICE_URL)
+
+  		//stubbed data
+  		moxios.stubRequest(process.env.VUE_APP_SCAPE_SUBJECTS_SERVICE_URL,{
+  			status: 200,
+  			response: {
+  				data:{
+  					subjects: [
+  						{
+  							code: mathsCode,
+  							name: "Maths"
+  						},
+  						{
+  							code: "A-ENG",
+  							name: "English"
+  						},
+  						{
+  							code: "A-HIST",
+  							name: "History"
+  						}
+  					]
+  				}
+  			}
+  		})
+
+  		moxios.wait(() => {
+    		see("Historyl")
+    	    see(mathsCode)
+  		})
+
+  	});
+
+  	it("a selected subject is not availble for reselection", () => {
+
+  		click("#subject-one")
+  		
+  	})
+
+});
